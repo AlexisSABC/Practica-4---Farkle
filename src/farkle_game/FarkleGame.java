@@ -13,6 +13,8 @@ import static java.awt.Font.PLAIN;
 public class FarkleGame {
     //Atributos
     private int playersAmount;
+    private ArrayList<Player> players = new ArrayList<>();
+    private int turnPlayerID;
 
     //Objetos graficos
     private JButton save;
@@ -29,18 +31,19 @@ public class FarkleGame {
     private ArrayList<JCheckBox> diceOptions;
 
     //ArrayList para controlar dados
-    ArrayList<Dice> dices;
+    ArrayList<JLabel> dicesImages;
     ArrayList<String> dicesPath;
 
     //Pedir inicialmente numero de jugadores
     public FarkleGame(){
-        //Pedir numero de jugadores
+        //Pedir numero de jugadores (y crearlos)
+        players = new ArrayList<>();
         playersWindow();
 
         //Declarar y ArrayLists objetos globales
         playerPoints = new ArrayList<>();
-        dices = new ArrayList<>();
         diceOptions = new ArrayList<>();
+        dicesImages = new ArrayList<>();
 
         //Agregar rutas de imagenes
         dicesPath = new ArrayList<>();
@@ -73,14 +76,14 @@ public class FarkleGame {
         //Definir etiqueta de instrucciones
         JLabel labelInstructions = new JLabel("Selecciona numero de jugadores:");
         labelInstructions.setFont(new Font ("ARIAL", Font.BOLD, 22));
-        labelInstructions.setBounds((500 - labelInstructions.getPreferredSize().width) / 2, 30, labelInstructions.getPreferredSize().width, labelInstructions.getPreferredSize().height);
+        labelInstructions.setBounds((500 - labelInstructions.getPreferredSize().width) / 2, (240 - labelInstructions.getPreferredSize().height) / 6, labelInstructions.getPreferredSize().width, labelInstructions.getPreferredSize().height);
         labelInstructions.setVisible(true);
 
         //Definit lista de jugadores
         JComboBox playersList = new JComboBox<>();
         playersList.setFont(new Font ("ARIAL", Font.BOLD, 22));
         playersList.setBackground(Color.WHITE);
-        playersList.setBounds((500 - 60) / 2, 70, 60, playersList.getPreferredSize().height);
+        playersList.setBounds((500 - 60) / 2, (240 - playersList.getPreferredSize().height) / 3, 60, playersList.getPreferredSize().height);
         playersList.setBorder(new LineBorder(Color.BLACK, 3));
         playersList.setVisible(true);
 
@@ -92,7 +95,7 @@ public class FarkleGame {
         save = new JButton("!!Jugar!!");
         save.setBackground(Color.WHITE);
         save.setFont(new Font ("ARIAL", Font.BOLD, 20));
-        save.setBounds((500 - save.getPreferredSize().width) / 2, 120, save.getPreferredSize().width, save.getPreferredSize().height);
+        save.setBounds((500 - save.getPreferredSize().width) / 2, ((240 - save.getPreferredSize().height) / 2) + 10, save.getPreferredSize().width, save.getPreferredSize().height);
         save.setBorder(new LineBorder(Color.BLACK, 3));
         save.setVisible(true);
 
@@ -120,6 +123,15 @@ public class FarkleGame {
         //Establecer numero de jugadores
         this.playersAmount = playersAmount;
 
+        //Crear jugadores
+        for(int i = 0; i < this.playersAmount; i++){
+            Player player = new Player();
+            players.add(player);
+        }
+
+        //Definir que jugador jugara
+
+
         //Generar ventana de juego
         playerWindow.dispose();
         generateWindow();
@@ -128,7 +140,7 @@ public class FarkleGame {
     //Construir ventana principal
     private void generateWindow(){
         //Crear y configurar ventana
-        window.setSize(1000, 500);
+        window.setSize(1100, 500);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setLocation(0, 0);
         window.setLayout(null);
@@ -142,7 +154,7 @@ public class FarkleGame {
         JLabel playerPointsTitle = new JLabel("Puntos de jugadores");
         playerPointsTitle.setVisible(true);
         playerPointsTitle.setFont(new Font ("ARIAL", Font.BOLD, 20));
-        playerPointsTitle.setBounds((1000 - 700) / 4, 20, playerPointsTitle.getPreferredSize().width, playerPointsTitle.getPreferredSize().height);
+        playerPointsTitle.setBounds((1100 - 700) / 4, 20, playerPointsTitle.getPreferredSize().width, playerPointsTitle.getPreferredSize().height);
         window.add(playerPointsTitle);
 
         //Etiquetas de jugadores
@@ -161,11 +173,11 @@ public class FarkleGame {
         playerTurn = new JLabel("Turno de Jugador n");
         playerTurn.setVisible(true);
         playerTurn.setFont(new Font ("ARIAL", Font.BOLD, 25));
-        playerTurn.setBounds( (330 / 3) + ((1000 - playerTurn.getPreferredSize().width) / 2), 50, playerTurn.getPreferredSize().width, playerTurn.getPreferredSize().height);
+        playerTurn.setBounds( (430 / 3) + ((1100 - playerTurn.getPreferredSize().width) / 2), (500 - playerTurn.getPreferredSize().height) / 12, playerTurn.getPreferredSize().width, playerTurn.getPreferredSize().height);
         window.add(playerTurn);
 
         //Mostrar dados
-        showDices();
+        manageDices(false);
 
         //Mostrar opciones de seleccion de dados
         for(int i = 0; i <= 5; i++){
@@ -174,7 +186,7 @@ public class FarkleGame {
         }
 
         for(int i = 0; i <= 5; i++){
-            diceOptions.get(i).setBounds(320 + (i * 100), ((500 - diceOptions.get(i).getPreferredSize().height) / 2) - 30, 100, diceOptions.get(i).getPreferredSize().height);
+            diceOptions.get(i).setBounds(420 + (i * 100), ((500 - diceOptions.get(i).getPreferredSize().height) / 2) - 30, 100, diceOptions.get(i).getPreferredSize().height);
             diceOptions.get(i).setBackground(Color.WHITE);
             diceOptions.get(i).setFont(new Font ("ARIAL", Font.BOLD, 18));
             window.add(diceOptions.get(i));
@@ -184,15 +196,32 @@ public class FarkleGame {
         playDices = new JButton("Tirar dados");
         playDices.setBackground(Color.WHITE);
         playDices.setFont(new Font ("ARIAL", Font.BOLD, 24));
-        playDices.setBounds(380, ((500 - playDices.getPreferredSize().height) / 2) + 20, playDices.getPreferredSize().width, playDices.getPreferredSize().height);
+        playDices.setBounds(480, ((500 - playDices.getPreferredSize().height) / 2) + 20, playDices.getPreferredSize().width, playDices.getPreferredSize().height);
         playDices.setBorder(new LineBorder(Color.BLACK, 3));
         playDices.setVisible(true);
         window.add(playDices);
 
-        //Evento para playDices
+        //Evento para playDices (Segun las opciones seleccionadas de playDices)
         playDices.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if(!diceOptions.get(0).isSelected()){
+                }
+
+                if(!diceOptions.get(1).isSelected()){
+                }
+
+                if(!diceOptions.get(2).isSelected()){
+                }
+
+                if(!diceOptions.get(3).isSelected()){
+                }
+
+                if(!diceOptions.get(4).isSelected()){
+                }
+
+                if(!diceOptions.get(5).isSelected()){
+                }
             }
         });
 
@@ -200,7 +229,7 @@ public class FarkleGame {
         pass = new JButton("Terminar turno");
         pass.setBackground(Color.WHITE);
         pass.setFont(new Font ("ARIAL", Font.BOLD, 24));
-        pass.setBounds(260 + (820 / 2), ((500 - pass.getPreferredSize().height) / 2) + 20, pass.getPreferredSize().width, pass.getPreferredSize().height);
+        pass.setBounds(360 + (820 / 2), ((500 - pass.getPreferredSize().height) / 2) + 20, pass.getPreferredSize().width, pass.getPreferredSize().height);
         pass.setBorder(new LineBorder(Color.BLACK, 3));
         pass.setVisible(true);
         window.add(pass);
@@ -209,6 +238,7 @@ public class FarkleGame {
         pass.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                //Aqui va codigo
             }
         });
 
@@ -216,14 +246,14 @@ public class FarkleGame {
         preliminaryPoints = new JLabel("Puntos preliminares: 0.");
         preliminaryPoints.setVisible(true);
         preliminaryPoints.setFont(new Font ("ARIAL", Font.BOLD, 20));
-        preliminaryPoints.setBounds( 320, ((500 - preliminaryPoints.getPreferredSize().height) / 2) + 60, preliminaryPoints.getPreferredSize().width, preliminaryPoints.getPreferredSize().height);
+        preliminaryPoints.setBounds( 420, ((500 - preliminaryPoints.getPreferredSize().height) / 2) + 65, preliminaryPoints.getPreferredSize().width, preliminaryPoints.getPreferredSize().height);
         window.add(preliminaryPoints);
 
         //Preparar mensaje de ganador
         winnerMessage = new JLabel("!!! JUGADOR n GANA EL JUEGO !!!");
         winnerMessage.setVisible(true);
         winnerMessage.setFont(new Font ("ARIAL", Font.BOLD, 30));
-        winnerMessage.setBounds( (1000 - winnerMessage.getPreferredSize().width) / 2, 365, winnerMessage.getPreferredSize().width, winnerMessage.getPreferredSize().height);
+        winnerMessage.setBounds( (1100 - winnerMessage.getPreferredSize().width) / 2, ((500 - winnerMessage.getPreferredSize().height) / 2) + 140, winnerMessage.getPreferredSize().width, winnerMessage.getPreferredSize().height);
         window.add(winnerMessage);
 
         //Configuraciones finales
@@ -232,16 +262,31 @@ public class FarkleGame {
     }
 
     //Mostrar dados
-    public void showDices(){
+    public void manageDices(boolean eraseDices){
         int generalSize = 100;
 
-        for (int i = 0; i <= 5; i++) {
-            ImageIcon originalImage = new ImageIcon(dicesPath.get(i));
-            ImageIcon resizedImage = new ImageIcon(originalImage.getImage().getScaledInstance(generalSize, generalSize, Image.SCALE_SMOOTH));
-            JLabel diceImage = new JLabel(resizedImage);
-            diceImage.setBounds(310 + (i * generalSize + 10), (500 - generalSize) / 5, generalSize, generalSize);
-            window.add(diceImage);
+        if(eraseDices){
+            dicesImages.forEach(
+                    dice -> dice.setVisible(false)
+            );
+
+        }else{
+            for (int i = 0; i <= 5; i++) {
+                ImageIcon originalImage = new ImageIcon(dicesPath.get(i)); //Modificar a dados de jugador
+                ImageIcon resizedImage = new ImageIcon(originalImage.getImage().getScaledInstance(generalSize, generalSize, Image.SCALE_SMOOTH));
+                JLabel diceImage = new JLabel(resizedImage);
+                diceImage.setBounds(410 + (i * generalSize + 10), (500 - generalSize) / 5, generalSize, generalSize);
+                diceImage.setVisible(true);
+                dicesImages.add(diceImage);
+                window.add(diceImage);
+            }
         }
         window.setVisible(true);
+    }
+
+    //Mostrar al ganador
+    public void showWinner(int winnerID){
+        winnerMessage.setText("!!! JUGADOR " + (turnPlayerID + 1) + " GANA EL JUEGO !!!");
+        winnerMessage.setVisible(true);
     }
 }

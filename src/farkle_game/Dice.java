@@ -1,30 +1,23 @@
 package farkle_game;
 
-import javax.swing.*;
-import java.awt.*;
 import java.util.Random;
 
 public class Dice {
     //Atributos
     private int dicePoints;
-    private int x;
-    private int y;
-    private String imagePath;
-    private JLabel dice;
+    private boolean playDice;
 
     //Inicializar dado
     public Dice(){
         dicePoints = 6;
+        playDice = true;
     }
 
     //Tirar Dado
-    public int playDice(){
+    public void playDice(){
         Random generator = new Random();
         int points = generator.nextInt(6) + 1;
-
         this.dicePoints = points;
-
-        return points;
     }
 
     //Mostrar dado en Ventana
@@ -65,5 +58,15 @@ public class Dice {
     //Getter de puntos de dado
     public int getDicePoints(){
         return dicePoints;
+    }
+
+    //Setter para playDice
+    public void setPlayDice(boolean playDice){
+        this.playDice = playDice;
+    }
+
+    //Getter para playDice
+    public boolean getPlayDice(){
+        return playDice;
     }
 }
