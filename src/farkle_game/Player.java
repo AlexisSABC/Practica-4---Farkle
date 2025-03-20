@@ -7,14 +7,6 @@ public class Player {
     private int playerPoints;
     private ArrayList<Dice> diceHand;
 
-    //Generar mano de dados
-    public Player(){
-        for(int i = 1; i <= 6; i++){
-            Dice dice = new Dice();
-            diceHand.add(dice);
-        }
-    }
-
     //Jugar turno
     public void playTurn(){
 
