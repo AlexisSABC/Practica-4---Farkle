@@ -1,19 +1,16 @@
 package farkle_game;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
-import static java.awt.Font.PLAIN;
-
 public class FarkleGame {
     //Atributos
     private int playersAmount;
-    private ArrayList<Player> players = new ArrayList<>();
+    private ArrayList<Player> players;
     private int turnPlayerID;
 
     //Objetos graficos
@@ -31,6 +28,7 @@ public class FarkleGame {
     private ArrayList<JCheckBox> diceOptions;
 
     //ArrayList para controlar dados
+    ArrayList<Dice> dices;
     ArrayList<JLabel> dicesImages;
     ArrayList<String> dicesPath;
 
@@ -40,10 +38,20 @@ public class FarkleGame {
         players = new ArrayList<>();
         playersWindow();
 
-        //Declarar y ArrayLists objetos globales
+        //Declarar y ArrayLists globales
         playerPoints = new ArrayList<>();
         diceOptions = new ArrayList<>();
         dicesImages = new ArrayList<>();
+
+        //Crear dados
+        dices = new ArrayList<>();
+        for(int i = 0; i <= 5; i++){
+            Dice dice = new Dice();
+            dices.add(dice);
+        }
+
+        //Inicializar ID de jugador en 0 (Jugador 1 inicia)
+        turnPlayerID = 0;
 
         //Agregar rutas de imagenes
         dicesPath = new ArrayList<>();
@@ -129,9 +137,6 @@ public class FarkleGame {
             players.add(player);
         }
 
-        //Definir que jugador jugara
-
-
         //Generar ventana de juego
         playerWindow.dispose();
         generateWindow();
@@ -139,6 +144,9 @@ public class FarkleGame {
 
     //Construir ventana principal
     private void generateWindow(){
+        //Arreglo de control para Lambdas
+        int y[] = {0};
+
         //Crear y configurar ventana
         window.setSize(1100, 500);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -163,17 +171,19 @@ public class FarkleGame {
             playerPoints.add(playerPointsLabel);
         }
 
-        for(int i = 0; i < playersAmount; i++){
-            playerPoints.get(i).setBounds(16, 30 + (i * 30), 300, 60);
-            playerPoints.get(i).setFont(new Font ("ARIAL", Font.BOLD, 20));
-            window.add(playerPoints.get(i));
-       }
+        y[0] = 0;
+        playerPoints.forEach(playerPoint -> {
+            playerPoint.setBounds(16, 30 + (y[0] * 30), 300, 60);
+            playerPoint.setFont(new Font ("ARIAL", Font.BOLD, 20));
+            window.add(playerPoint);
+            y[0]++;
+        });
 
         //Mostrar turno de jugador
-        playerTurn = new JLabel("Turno de Jugador n");
+        playerTurn = new JLabel("Turno de Jugador 1");
         playerTurn.setVisible(true);
         playerTurn.setFont(new Font ("ARIAL", Font.BOLD, 25));
-        playerTurn.setBounds( (430 / 3) + ((1100 - playerTurn.getPreferredSize().width) / 2), (500 - playerTurn.getPreferredSize().height) / 12, playerTurn.getPreferredSize().width, playerTurn.getPreferredSize().height);
+        playerTurn.setBounds( (430 / 3) + ((1100 - playerTurn.getPreferredSize().width) / 2), (500 - playerTurn.getPreferredSize().height) / 12, playerTurn.getPreferredSize().width + 60, playerTurn.getPreferredSize().height);
         window.add(playerTurn);
 
         //Mostrar dados
@@ -185,12 +195,14 @@ public class FarkleGame {
             diceOptions.add(diceOption);
         }
 
-        for(int i = 0; i <= 5; i++){
-            diceOptions.get(i).setBounds(420 + (i * 100), ((500 - diceOptions.get(i).getPreferredSize().height) / 2) - 30, 100, diceOptions.get(i).getPreferredSize().height);
-            diceOptions.get(i).setBackground(Color.WHITE);
-            diceOptions.get(i).setFont(new Font ("ARIAL", Font.BOLD, 18));
-            window.add(diceOptions.get(i));
-        }
+        y[0] = 0;
+        diceOptions.forEach(diceOption -> {
+            diceOption.setBounds(420 + (y[0] * 100), ((500 - diceOption.getPreferredSize().height) / 2) - 30, 100, diceOption.getPreferredSize().height);
+            diceOption.setBackground(Color.WHITE);
+            diceOption.setFont(new Font ("ARIAL", Font.BOLD, 18));
+            window.add(diceOption);
+            y[0]++;
+        });
 
         //Boton de tiro de dados
         playDices = new JButton("Tirar dados");
@@ -201,27 +213,40 @@ public class FarkleGame {
         playDices.setVisible(true);
         window.add(playDices);
 
-        //Evento para playDices (Segun las opciones seleccionadas de playDices)
+        //Evento para playDices (Segun los dados seleccionados de playDices)
         playDices.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(!diceOptions.get(0).isSelected()){
+                if(diceOptions.get(0).isSelected()){
+                    dices.get(0).playDice();
                 }
 
-                if(!diceOptions.get(1).isSelected()){
+                if(diceOptions.get(1).isSelected()){
+                    dices.get(1).playDice();
                 }
 
-                if(!diceOptions.get(2).isSelected()){
+                if(diceOptions.get(2).isSelected()){
+                    dices.get(2).playDice();
                 }
 
-                if(!diceOptions.get(3).isSelected()){
+                if(diceOptions.get(3).isSelected()){
+                    dices.get(3).playDice();
                 }
 
-                if(!diceOptions.get(4).isSelected()){
+                if(diceOptions.get(4).isSelected()){
+                    dices.get(4).playDice();
                 }
 
-                if(!diceOptions.get(5).isSelected()){
+                if(diceOptions.get(5).isSelected()){
+                    dices.get(5).playDice();
                 }
+
+                //Borrar y mostrar dados
+                manageDices(true);
+                manageDices(false);
+
+                //Controlar Jugador (Analizar dados)
+                analyzeDices();
             }
         });
 
@@ -234,11 +259,11 @@ public class FarkleGame {
         pass.setVisible(true);
         window.add(pass);
 
-        //Evento para pass
+        //Evento para pass (Pasar de turno)
         pass.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //Aqui va codigo
+                skipTurn();
             }
         });
 
@@ -246,14 +271,14 @@ public class FarkleGame {
         preliminaryPoints = new JLabel("Puntos preliminares: 0.");
         preliminaryPoints.setVisible(true);
         preliminaryPoints.setFont(new Font ("ARIAL", Font.BOLD, 20));
-        preliminaryPoints.setBounds( 420, ((500 - preliminaryPoints.getPreferredSize().height) / 2) + 65, preliminaryPoints.getPreferredSize().width, preliminaryPoints.getPreferredSize().height);
+        preliminaryPoints.setBounds( 420, ((500 - preliminaryPoints.getPreferredSize().height) / 2) + 65, preliminaryPoints.getPreferredSize().width + 100, preliminaryPoints.getPreferredSize().height);
         window.add(preliminaryPoints);
 
         //Preparar mensaje de ganador
         winnerMessage = new JLabel("!!! JUGADOR n GANA EL JUEGO !!!");
-        winnerMessage.setVisible(true);
+        winnerMessage.setVisible(false);
         winnerMessage.setFont(new Font ("ARIAL", Font.BOLD, 30));
-        winnerMessage.setBounds( (1100 - winnerMessage.getPreferredSize().width) / 2, ((500 - winnerMessage.getPreferredSize().height) / 2) + 140, winnerMessage.getPreferredSize().width, winnerMessage.getPreferredSize().height);
+        winnerMessage.setBounds( (1100 - winnerMessage.getPreferredSize().width) / 2, ((500 - winnerMessage.getPreferredSize().height) / 2) + 120, winnerMessage.getPreferredSize().width + 60, winnerMessage.getPreferredSize().height);
         window.add(winnerMessage);
 
         //Configuraciones finales
@@ -263,7 +288,7 @@ public class FarkleGame {
 
     //Mostrar dados
     public void manageDices(boolean eraseDices){
-        int generalSize = 100;
+        int generalSize = 100; //Establecer dimensiones generales de las imagenes
 
         if(eraseDices){
             dicesImages.forEach(
@@ -272,7 +297,7 @@ public class FarkleGame {
 
         }else{
             for (int i = 0; i <= 5; i++) {
-                ImageIcon originalImage = new ImageIcon(dicesPath.get(i)); //Modificar a dados de jugador
+                ImageIcon originalImage = new ImageIcon(dicesPath.get(dices.get(i).getPathID())); //Modificar a dados de jugador
                 ImageIcon resizedImage = new ImageIcon(originalImage.getImage().getScaledInstance(generalSize, generalSize, Image.SCALE_SMOOTH));
                 JLabel diceImage = new JLabel(resizedImage);
                 diceImage.setBounds(410 + (i * generalSize + 10), (500 - generalSize) / 5, generalSize, generalSize);
@@ -288,5 +313,42 @@ public class FarkleGame {
     public void showWinner(int winnerID){
         winnerMessage.setText("!!! JUGADOR " + (turnPlayerID + 1) + " GANA EL JUEGO !!!");
         winnerMessage.setVisible(true);
+
+        //Ocultar elementos
+        playDices.setVisible(false);
+        pass.setVisible(false);
+        preliminaryPoints.setVisible(false);
+
+        diceOptions.forEach(dice -> {
+            dice.setVisible(false);
+        });
+    }
+
+    //Pasar de turno
+    public void skipTurn(){
+        //Declarar al ganador o seguir jugando
+        if(players.get(turnPlayerID).getPlayerPoints() >= 10000){
+            showWinner(turnPlayerID);
+
+        }else{
+            //Circlar Id de Jugador
+            turnPlayerID++;
+            if(turnPlayerID == playersAmount){
+                turnPlayerID = 0;
+            }
+
+            //Reseleccionar dados
+            diceOptions.forEach(dice -> {
+                dice.setSelected(true);
+            });
+
+            //Actualizar etiqueta de turno de jugador
+            playerTurn.setText("Turno de Jugador " + (turnPlayerID + 1));
+        }
+    }
+
+    //Control de turno
+    public void analyzeDices(){
+        //Codigo para analizar los puntos de los dados
     }
 }

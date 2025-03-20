@@ -4,20 +4,17 @@ import java.util.Random;
 
 public class Dice {
     //Atributos
-    private int dicePoints;
-    private boolean playDice;
+    private int dicePoints; //Guarda los puntos del dado
 
     //Inicializar dado
     public Dice(){
         dicePoints = 6;
-        playDice = true;
     }
 
     //Tirar Dado
     public void playDice(){
         Random generator = new Random();
-        int points = generator.nextInt(6) + 1;
-        this.dicePoints = points;
+        this.dicePoints = generator.nextInt(6) + 1;
     }
 
     //Mostrar dado en Ventana
@@ -58,15 +55,5 @@ public class Dice {
     //Getter de puntos de dado
     public int getDicePoints(){
         return dicePoints;
-    }
-
-    //Setter para playDice
-    public void setPlayDice(boolean playDice){
-        this.playDice = playDice;
-    }
-
-    //Getter para playDice
-    public boolean getPlayDice(){
-        return playDice;
     }
 }

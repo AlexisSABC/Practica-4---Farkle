@@ -1,26 +1,20 @@
 package farkle_game;
 
-import java.util.ArrayList;
-import java.util.Random;
-
 public class Player {
     //Atributos
-    private int playerPoints;
-
-    //Preparar dados para jugador
-    public Player() {
-    }
-
-    //Jugar dados
-    public void playDices(){
-    }
+    private int playerPoints; //Guarda los puntos del jugador
 
     //Analizar resultados de tiro
     public void analyzeHand(){
     }
 
-    //Regresar puntos de jugador
+    //Getter para puntos de jugador
     public int getPlayerPoints() {
         return playerPoints;
+    }
+
+    //Setter para puntos de jugador
+    public void setPlayerPoints(int playerPoints) {
+        this.playerPoints = playerPoints;
     }
 }
