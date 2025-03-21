@@ -4,75 +4,56 @@ import java.util.Random;
 
 public class Dice {
     //Atributos
-    private int dicePoints;
-    private int x;
-    private int y;
+    private int dicePoints; //Guarda los puntos del dado
+
+    //Inicializar dado
+    public Dice(){
+        dicePoints = 6;
+    }
 
     //Tirar Dado
-    public int playDice(){
+    public void playDice(){
         Random generator = new Random();
-        int points = generator.nextInt(6) + 1;
-
-        showDice(points);
-
-        return points;
+        this.dicePoints = generator.nextInt(6) + 1;
     }
 
     //Mostrar dado en Ventana
-    private void showDice(int points){
-        switch(points){
+    public int getPathID(){
+        int imagePathID = 0;
+        switch(dicePoints){
             case 1:
-
+                imagePathID = 0;
                 break;
 
             case 2:
+                imagePathID = 1;
                 break;
 
             case 3:
+                imagePathID = 2;
                 break;
 
             case 4:
+                imagePathID = 3;
                 break;
 
             case 5:
+                imagePathID = 4;
                 break;
 
             case 6:
+                imagePathID = 5;
                 break;
 
             default:
                 //Hacer nada
                 break;
         }
-    }
-
-    //Borrar dado de ventana
-    public void eraseDice(){
-
+        return imagePathID;
     }
 
     //Getter de puntos de dado
     public int getDicePoints(){
         return dicePoints;
-    }
-
-    //Getter de pocision en x
-    public int getX(){
-        return x;
-    }
-
-    //Getter de pocision en y
-    public int getY(){
-        return y;
-    }
-
-    //Setter de pocision en x
-    public void setX(int x){
-        this.x = x;
-    }
-
-    //Setter de pocision en x
-    public void setY(int y){
-        this.y = y;
     }
 }
