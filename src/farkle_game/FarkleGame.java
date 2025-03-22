@@ -12,6 +12,7 @@ public class FarkleGame {
     private int playersAmount;
     private ArrayList<Player> players;
     private int turnPlayerID;
+    private boolean hotDice=false;
 
     //Objetos graficos
     private JButton save;
@@ -25,12 +26,12 @@ public class FarkleGame {
     private JLabel preliminaryPoints;
     private JLabel winnerMessage;
     private ArrayList<JLabel> playerPoints;
-    private ArrayList<JCheckBox> diceOptions;
 
     //ArrayList para controlar dados
     ArrayList<Dice> dices;
     ArrayList<JLabel> dicesImages;
     ArrayList<String> dicesPath;
+    ArrayList<JLabel> dicesAvailableSign;
 
     //Pedir inicialmente numero de jugadores
     public FarkleGame(){
@@ -40,8 +41,8 @@ public class FarkleGame {
 
         //Declarar y ArrayLists globales
         playerPoints = new ArrayList<>();
-        diceOptions = new ArrayList<>();
         dicesImages = new ArrayList<>();
+        dicesAvailableSign = new ArrayList<>();
 
         //Crear dados
         dices = new ArrayList<>();
@@ -144,7 +145,7 @@ public class FarkleGame {
 
     //Construir ventana principal
     private void generateWindow(){
-        //Arreglo de control para Lambdas
+        //Acumulador para Lambdas
         int y[] = {0};
 
         //Crear y configurar ventana
@@ -189,18 +190,18 @@ public class FarkleGame {
         //Mostrar dados
         manageDices(false);
 
-        //Mostrar opciones de seleccion de dados
+        //Mostrar etiquetas de disponibilidad
         for(int i = 0; i <= 5; i++){
-            JCheckBox diceOption = new JCheckBox("Dado " + (i + 1), true);
-            diceOptions.add(diceOption);
+            JLabel diceAvailableSign = new JLabel("Jugable");
+            dicesAvailableSign.add(diceAvailableSign);
         }
 
         y[0] = 0;
-        diceOptions.forEach(diceOption -> {
-            diceOption.setBounds(420 + (y[0] * 100), ((500 - diceOption.getPreferredSize().height) / 2) - 30, 100, diceOption.getPreferredSize().height);
-            diceOption.setBackground(Color.WHITE);
-            diceOption.setFont(new Font ("ARIAL", Font.BOLD, 18));
-            window.add(diceOption);
+        dicesAvailableSign.forEach(sign -> {
+            sign.setBounds(435 + (y[0] * 100), ((500 - sign.getPreferredSize().height) / 3) + 25, 100, sign.getPreferredSize().height + 14);
+            sign.setFont(new Font ("ARIAL", Font.BOLD, 18));
+            sign.setVisible(true);
+            window.add(sign);
             y[0]++;
         });
 
@@ -208,45 +209,26 @@ public class FarkleGame {
         playDices = new JButton("Tirar dados");
         playDices.setBackground(Color.WHITE);
         playDices.setFont(new Font ("ARIAL", Font.BOLD, 24));
-        playDices.setBounds(480, ((500 - playDices.getPreferredSize().height) / 2) + 20, playDices.getPreferredSize().width, playDices.getPreferredSize().height);
+        playDices.setBounds(480, ((500 - playDices.getPreferredSize().height) / 2) + 5, playDices.getPreferredSize().width, playDices.getPreferredSize().height);
         playDices.setBorder(new LineBorder(Color.BLACK, 3));
         playDices.setVisible(true);
         window.add(playDices);
 
-        //Evento para playDices (Segun los dados seleccionados de playDices)
+        //Evento para playDices (Tirar los dados que se pueden tirar, es decir, los que aun no dan puntos)
         playDices.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(diceOptions.get(0).isSelected()){
-                    dices.get(0).playDice();
-                }
-
-                if(diceOptions.get(1).isSelected()){
-                    dices.get(1).playDice();
-                }
-
-                if(diceOptions.get(2).isSelected()){
-                    dices.get(2).playDice();
-                }
-
-                if(diceOptions.get(3).isSelected()){
-                    dices.get(3).playDice();
-                }
-
-                if(diceOptions.get(4).isSelected()){
-                    dices.get(4).playDice();
-                }
-
-                if(diceOptions.get(5).isSelected()){
-                    dices.get(5).playDice();
-                }
+                dices.forEach(dice -> {
+                    if(dice.getCanPlayDice()){
+                        dice.playDice();
+                    }
+                });
 
                 //Borrar y mostrar dados
                 manageDices(true);
                 manageDices(false);
 
-                //Controlar Jugador (Analizar dados)
-                analyzeDices();
+                //Analizar dados
             }
         });
 
@@ -254,7 +236,7 @@ public class FarkleGame {
         pass = new JButton("Terminar turno");
         pass.setBackground(Color.WHITE);
         pass.setFont(new Font ("ARIAL", Font.BOLD, 24));
-        pass.setBounds(360 + (820 / 2), ((500 - pass.getPreferredSize().height) / 2) + 20, pass.getPreferredSize().width, pass.getPreferredSize().height);
+        pass.setBounds(360 + (820 / 2), ((500 - pass.getPreferredSize().height) / 2) + 5, pass.getPreferredSize().width, pass.getPreferredSize().height);
         pass.setBorder(new LineBorder(Color.BLACK, 3));
         pass.setVisible(true);
         window.add(pass);
@@ -319,8 +301,8 @@ public class FarkleGame {
         pass.setVisible(false);
         preliminaryPoints.setVisible(false);
 
-        diceOptions.forEach(dice -> {
-            dice.setVisible(false);
+        dicesAvailableSign.forEach(sign -> {
+            sign.setVisible(false);
         });
     }
 
@@ -338,8 +320,12 @@ public class FarkleGame {
             }
 
             //Reseleccionar dados
-            diceOptions.forEach(dice -> {
-                dice.setSelected(true);
+            dices.forEach(dice -> {
+                dice.setCanPlayDice(true);
+            });
+
+            dicesAvailableSign.forEach(sign -> {
+                sign.setVisible(true);
             });
 
             //Actualizar etiqueta de turno de jugador
@@ -347,8 +333,144 @@ public class FarkleGame {
         }
     }
 
-    //Control de turno
-    public void analyzeDices(){
-        //Codigo para analizar los puntos de los dados
+    //Bloquear dados para proximos tiros de un turno
+    public void lockDice(int diceID){
+        dices.get(diceID).setCanPlayDice(false);
+        dicesAvailableSign.get(diceID).setVisible(false);
+    }
+
+    //revisa si hay 3 iguales
+    public int threeAlike(){
+        int howMany=0;
+        Dice diceResult = null;
+        int y[] = {0}; //Acumular valor final de dado
+        int j[] = {0}; //Acumulador para lambdas
+
+        for(int i = 0; i<dices.size()-2;i++){
+            for(int l =i+1; l<dices.size();l++){
+                Dice diceA = dices.get(i);
+                Dice diceB = dices.get(l);
+                if(diceA.getDicePoints() == diceB.getDicePoints()){
+                    howMany++;
+                    diceResult = diceA;
+                }
+            }
+
+            y[0] = diceResult.getDicePoints(); //Guardar valor de diceResult para usarlo en Lambda
+            j[0] = 0; //Preparar acumulador para lambda
+
+            if(howMany == 2){ //si 3 fueron iguales regresa la cantidad de puntos que debe
+                if(diceResult.getDicePoints() == 1){
+
+                    //Bloquear dados
+                    dices.forEach(dice -> {
+                        if(dice.getDicePoints() == y[0]){
+                            dice.setCanPlayDice(false);
+                            dicesAvailableSign.get(j[0]).setVisible(false);
+                        }
+                        j[0]++;
+                    });
+
+                    return 1000;
+                }else {
+                    //Bloquear dados
+                    dices.forEach(dice -> {
+                        if(dice.getDicePoints() == y[0]){
+                            dice.setCanPlayDice(false);
+                            dicesAvailableSign.get(j[0]).setVisible(false);
+                        }
+                        j[0]++;
+                    });
+
+                    return diceResult.getDicePoints()*100;
+                }
+            }
+            howMany =0; //si la primera carta no tiene un trio, entonces vuelve a 0
+        }
+        return 0;
+    }
+
+    public boolean allMatch(){
+        return dices.stream().allMatch(
+                c ->  dices.get(0).getDicePoints() == (c.getDicePoints()) //revisa si todas son iguales
+        );
+    }
+
+    public int onesOfFiveMoreThanThree(int oneOrFive) { //devuelve la puntuacion de los unos y cincos en juego restando los trios de unos y cinco
+        int howMany=0;
+        int y[] = {0}; //Acumulador para lambdas
+
+        for(int i =0; i<dices.size();i++) {
+            Dice diceA = dices.get(i);
+            if (diceA.getDicePoints() == oneOrFive) {
+                howMany++;
+            }
+        }
+        if(howMany > 2){ //si mas de 3 fueron iguales, devuelve la puntuacion de las siguientes a esas 3
+            if(oneOrFive == 1){
+
+                //Bloquear dados
+                dices.forEach(dice -> {
+                    if(dice.getDicePoints() == 1){
+                        dice.setCanPlayDice(false);
+                        dicesAvailableSign.get(y[0]).setVisible(false);
+                    }
+                    y[0]++;
+                });
+
+                return 100*(howMany-2);
+            }else if(oneOrFive == 5){
+
+                //Bloquear dados
+                dices.forEach(dice -> {
+                    if(dice.getDicePoints() == 5){
+                        dice.setCanPlayDice(false);
+                        dicesAvailableSign.get(y[0]).setVisible(false);
+                    }
+                    y[0]++;
+                });
+
+                return 50*(howMany-2);
+            }
+        }
+        return 0;
+    }
+
+    public int onesOfFive(int oneOrFive){ //este metodo devuelve los puntos de todos los 1 y 5 en los dados, solo utilizarla cuando no haya un trio en juego
+        int howMany=0;
+        int y[] = {0}; //Acumulador para lambdas
+
+        for(int i =0; i<dices.size();i++) {
+            Dice diceA = dices.get(i);
+            if (diceA.getDicePoints() == oneOrFive) {
+                howMany++;
+            }
+        }
+        if(oneOrFive == 1){ //dependiendo cuantos unos o 5 haya, devuelve la cantidad de puntos
+
+            //Bloquear dados
+            dices.forEach(dice -> {
+                if(dice.getDicePoints() == 1){
+                    dice.setCanPlayDice(false);
+                    dicesAvailableSign.get(y[0]).setVisible(false);
+                }
+                y[0]++;
+            });
+
+            return 100*(howMany);
+        }else if(oneOrFive == 5){
+
+            //Bloquear dados
+            dices.forEach(dice -> {
+                if(dice.getDicePoints() == 5){
+                    dice.setCanPlayDice(false);
+                    dicesAvailableSign.get(y[0]).setVisible(false);
+                }
+                y[0]++;
+            });
+
+            return 50*(howMany);
+        }
+        return 0;
     }
 }

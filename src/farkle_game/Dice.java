@@ -5,10 +5,12 @@ import java.util.Random;
 public class Dice {
     //Atributos
     private int dicePoints; //Guarda los puntos del dado
+    private boolean canPlayDice; //Determina si el dado se puede o no jugar si el dado pertenece a un dado con puntuacion
 
     //Inicializar dado
     public Dice(){
         dicePoints = 6;
+        canPlayDice = true;
     }
 
     //Tirar Dado
@@ -55,5 +57,15 @@ public class Dice {
     //Getter de puntos de dado
     public int getDicePoints(){
         return dicePoints;
+    }
+
+    //Getter para canPlayDice
+    public boolean getCanPlayDice(){
+        return canPlayDice;
+    }
+
+    //Setter para canPlayDice
+    public void setCanPlayDice(boolean canPlayDice){
+        this.canPlayDice = canPlayDice;
     }
 }
