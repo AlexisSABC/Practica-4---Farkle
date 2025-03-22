@@ -4,51 +4,54 @@ import java.util.Random;
 
 public class Dice {
     //Atributos
-    private int dicePoints;
-    private int x;
-    private int y;
+    private int dicePoints; //Guarda los puntos del dado
+    private boolean canPlayDice; //Determina si el dado se puede o no jugar si el dado pertenece a un dado con puntuacion
+
+    //Inicializar dado
+    public Dice(){
+        dicePoints = 6;
+        canPlayDice = true;
+    }
 
     //Tirar Dado
-    public int playDice(){
+    public void playDice(){
         Random generator = new Random();
-        int points = generator.nextInt(6) + 1;
-
-        showDice(points);
-
-        return points;
+        this.dicePoints = generator.nextInt(6) + 1;
     }
 
     //Mostrar dado en Ventana
-    private void showDice(int points){
-        switch(points){
+    public int getPathID(){
+        int imagePathID = 0;
+        switch(dicePoints){
             case 1:
-
+                imagePathID = 0;
                 break;
 
             case 2:
+                imagePathID = 1;
                 break;
 
             case 3:
+                imagePathID = 2;
                 break;
 
             case 4:
+                imagePathID = 3;
                 break;
 
             case 5:
+                imagePathID = 4;
                 break;
 
             case 6:
+                imagePathID = 5;
                 break;
 
             default:
                 //Hacer nada
                 break;
         }
-    }
-
-    //Borrar dado de ventana
-    public void eraseDice(){
-
+        return imagePathID;
     }
 
     //Getter de puntos de dado
@@ -56,23 +59,13 @@ public class Dice {
         return dicePoints;
     }
 
-    //Getter de pocision en x
-    public int getX(){
-        return x;
+    //Getter para canPlayDice
+    public boolean getCanPlayDice(){
+        return canPlayDice;
     }
 
-    //Getter de pocision en y
-    public int getY(){
-        return y;
-    }
-
-    //Setter de pocision en x
-    public void setX(int x){
-        this.x = x;
-    }
-
-    //Setter de pocision en x
-    public void setY(int y){
-        this.y = y;
+    //Setter para canPlayDice
+    public void setCanPlayDice(boolean canPlayDice){
+        this.canPlayDice = canPlayDice;
     }
 }
