@@ -120,7 +120,7 @@ public class DicesSet {
 
         }else{
             for (int i = 0; i <= 5; i++) {
-                ImageIcon originalImage = new ImageIcon(dicesPath.get(dices.get(i).getPathID())); //Modificar a dados de jugador
+                ImageIcon originalImage = new ImageIcon(dicesPath.get(dices.get(i).getImagePathID())); //Modificar a dados de jugador
                 ImageIcon resizedImage = new ImageIcon(originalImage.getImage().getScaledInstance(generalSize, generalSize, Image.SCALE_SMOOTH));
                 JLabel diceImage = new JLabel(resizedImage);
                 diceImage.setBounds(410 + (i * generalSize + 10), (500 - generalSize) / 5, generalSize, generalSize);

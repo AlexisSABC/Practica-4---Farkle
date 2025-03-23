@@ -20,7 +20,7 @@ public class Dice {
     }
 
     //Mostrar dado en Ventana
-    public int getPathID(){
+    public int getImagePathID(){
         int imagePathID = 0;
         switch(dicePoints){
             case 1:
