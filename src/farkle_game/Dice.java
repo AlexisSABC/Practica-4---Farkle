@@ -13,6 +13,10 @@ public class Dice {
         canPlayDice = true;
     }
 
+    public void setDicePoints(int dicePoints) {
+        this.dicePoints = dicePoints;
+    }
+
     //Tirar Dado
     public void playDice(){
         Random generator = new Random();

@@ -11,11 +11,16 @@ public class FarkleGame {
     //Atributos
     private int objectivePoints;
     private int playersAmount;
+
     private ArrayList<Player> players;
     private int turnPlayerID;
+
     private int puntosJugadorRonda;
     private int preliminarPoints;
-    public boolean isFarkle;
+
+    private boolean isFarkle;
+    private boolean unnableHotDices;
+    private int hotDicesPoints;
 
     //Objetos graficos
     private JButton playDices;
@@ -39,6 +44,10 @@ public class FarkleGame {
 
         //Establecer puntaje
         this.objectivePoints = objectivePoints;
+
+        //Determinar "Hot Dices" en verdadero
+        unnableHotDices = true;
+        hotDicesPoints = 0;
 
         //Establecer valores por defecto
         isFarkle = false;
@@ -166,8 +175,8 @@ public class FarkleGame {
         //Puntos preliminares de jugador n
         preliminaryPoints = new JLabel("Puntos preliminares: 0.");
         preliminaryPoints.setVisible(true);
-        preliminaryPoints.setFont(new Font ("ARIAL", Font.BOLD, 20));
-        preliminaryPoints.setBounds( 420, ((500 - preliminaryPoints.getPreferredSize().height) / 2) + 65, preliminaryPoints.getPreferredSize().width + 200, preliminaryPoints.getPreferredSize().height);
+        preliminaryPoints.setFont(new Font ("ARIAL", Font.BOLD, 22));
+        preliminaryPoints.setBounds( (430 / 3) + ((1100 - preliminaryPoints.getPreferredSize().width) / 2) - 20, ((500 - preliminaryPoints.getPreferredSize().height) / 2) + 65, preliminaryPoints.getPreferredSize().width + 200, preliminaryPoints.getPreferredSize().height);
         window.add(preliminaryPoints);
 
         //Preparar mensaje de ganador
@@ -220,6 +229,8 @@ public class FarkleGame {
 
             //Reseleccionar dados
             dicesSet.unlockAllDices();
+            unnableHotDices = true;
+            hotDicesPoints = 0;
 
             //Actualizar etiqueta de turno de jugador
             playerTurn.setText("Turno de Jugador " + (turnPlayerID + 1));
@@ -386,21 +397,17 @@ public class FarkleGame {
         return points; //devuelve la suma de los puntos del jugador si es el caso, sino devuelve 0
     }
 
-    //regresa falso si no tiene hot dice o regresa verdadero si se tiene hot dice
-    public boolean haveHotDice(){
-        boolean hotDice = true;
-        for(int i =0 ; i<dicesSet.getDicesSize();i++){
-            Dice diceA = dicesSet.getDice(i);
-            if(!diceA.getCanPlayDice()){
-                return false;
+    //Determinar si existen Hot Dices
+    public void findHotDices(){
+        dicesSet.getDices().forEach(dice -> {
+            if(dice.getCanPlayDice() == false){
+                unnableHotDices = false;
             }
-        }
-        return hotDice;
+        });
     }
 
     //devuelve los puntos que tiene el jugador actualmente
     public void getPreliminarPoints() {
-
         int points = 0;
         int threeAlikePoints = threeAlike();
         if (allMatch()) {
@@ -424,20 +431,44 @@ public class FarkleGame {
                 points += threeAlikePoints;
             }
         }
-        preliminarPoints = points;
+
+        //Determinar si existen Hot Dices
+        findHotDices();
+
+        //Acumular puntos si existen Hot Dices
+        if(unnableHotDices){
+            dicesSet.unlockAllDices();
+            hotDicesPoints = points + hotDicesPoints;
+            preliminarPoints = hotDicesPoints;
+
+        }else{
+            preliminarPoints = hotDicesPoints + points;
+        }
+
         preliminaryPoints.setText("Puntos preliminares: " + preliminarPoints + ".");
 
         //Verifica si se puede jugar o no
-        determinarFarkle();
+        determinarJugada();
     }
 
-    public void determinarFarkle(){ //tomar este metodo como por turno de jugador
+    //Determina si es Farkle, Hot Dices o se continua comunmente
+    public void determinarJugada(){
         isFarkle = false;
-        if(preliminarPoints <= puntosJugadorRonda){ //verifica si cambio los puntos de la ronda, osea obtuvo mejor puntuacion, en caso contario es farkle y pierde todos los puntos de la ronda
+        boolean isAllLocked[] = {false};
+
+        //Determinar si los dados ya estan bloqueados
+        dicesSet.getDices().forEach(dice -> {
+            if(dice.getCanPlayDice()){
+                isAllLocked[0] = true;
+            }
+        });
+
+        if((preliminarPoints <= puntosJugadorRonda) && isAllLocked[0]){ //verifica si cambio los puntos de la ronda, osea obtuvo mejor puntuacion, en caso contario es farkle y pierde todos los puntos de la ronda
             isFarkle = true; //avisa que no cambio nada de puntos, por lo cual es farkle
             dicesSet.lockAllDices();
             preliminaryPoints.setText("FARKLE - Puntos perdidos");
             preliminarPoints = 0;
+
         }else{
             puntosJugadorRonda=preliminarPoints; //va guardando los puntos de la ronda
         }
