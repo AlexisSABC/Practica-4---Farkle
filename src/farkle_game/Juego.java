@@ -3,7 +3,7 @@ package farkle_game;
 public class Juego {
     public static void main(String[] args){
 
-        //Iniciar Juego
-        FarkleGame game = new FarkleGame();
+        //Obtener cantidad de jugadores e iniciar juego
+        EnterPlayersWindow setPlayers = new EnterPlayersWindow();
     }
 }

@@ -10,7 +10,7 @@ public class Player {
     }
 
     //Setter para puntos de jugador
-    public void setPlayerPoints(int playerPoints) {
-        this.playerPoints = playerPoints;
+    public void setPlayerPoints(int points) {
+        playerPoints = playerPoints + points;
     }
 }
