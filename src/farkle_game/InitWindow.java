@@ -6,7 +6,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class EnterPlayersWindow {
+public class InitWindow {
     //Declarar objetos y atributos
     private JFrame playerWindow;
     private JButton save;
@@ -15,7 +15,7 @@ public class EnterPlayersWindow {
     private int objectivePoints;
 
     //Invicar ventana
-    public EnterPlayersWindow(){
+    public InitWindow(){
         playersWindow();
     }
 
