@@ -19,7 +19,6 @@ public class FarkleGame {
     private int preliminarPoints; //Muestra los puntos tentativos del turno actual
 
     private boolean isFarkle; //Determina si el tiro de dados es un "Farkle"
-    private boolean unnableHotDices; //Determina si existen "Hot Dices"
     private int hotDicesPoints; //Guarda los puntos obtenidos con Hot Dices
 
     //Objetos graficos
@@ -46,7 +45,6 @@ public class FarkleGame {
         this.objectivePoints = objectivePoints;
 
         //Determinar "Hot Dices" en verdadero
-        unnableHotDices = true;
         hotDicesPoints = 0;
 
         //Establecer valores por defecto
@@ -97,7 +95,7 @@ public class FarkleGame {
         JLabel playerPointsTitle = new JLabel("Limite de " + objectivePoints + " Puntos");
         playerPointsTitle.setVisible(true);
         playerPointsTitle.setFont(new Font ("ARIAL", Font.BOLD, 20));
-        playerPointsTitle.setBounds((1100 - 700) / 6, 20, playerPointsTitle.getPreferredSize().width, playerPointsTitle.getPreferredSize().height);
+        playerPointsTitle.setBounds((1100 - 700) / 6, 20, 400, playerPointsTitle.getPreferredSize().height);
         window.add(playerPointsTitle);
 
         //Crea etiquetas de puntos jugadores
@@ -231,7 +229,6 @@ public class FarkleGame {
 
             //Reseleccionar dados
             dicesSet.unlockAllDices();
-            unnableHotDices = true;
             hotDicesPoints = 0;
 
             //Actualizar etiqueta de turno de jugador
@@ -406,12 +403,16 @@ public class FarkleGame {
     }
 
     //Determinar si existen Hot Dices
-    public void findHotDices(){
+    public boolean findHotDices(){
+        boolean hotDices[] = {true};
+
         dicesSet.getDices().forEach(dice -> {
             if(dice.getCanPlayDice() == true){
-                unnableHotDices = false;
+                hotDices[0] = false;
             }
         });
+
+        return hotDices[0];
     }
 
     //devuelve los puntos que tiene el jugador actualmente
@@ -440,11 +441,8 @@ public class FarkleGame {
             }
         }
 
-        //Determinar si existen Hot Dices
-        findHotDices();
-
         //Acumular puntos si existen Hot Dices
-        if(unnableHotDices){
+        if(findHotDices()){
             dicesSet.unlockAllDices();
             hotDicesPoints = points + hotDicesPoints;
             preliminarPoints = hotDicesPoints;
