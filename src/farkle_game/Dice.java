@@ -13,17 +13,17 @@ public class Dice {
         canPlayDice = true;
     }
 
-    public void setDicePoints(int dicePoints) {
-        this.dicePoints = dicePoints;
-    }
-
     //Tirar Dado
     public void playDice(){
         Random generator = new Random();
         this.dicePoints = generator.nextInt(6) + 1;
     }
 
-    //Mostrar dado en Ventana
+    public void setDicePoints(int dicePoints){
+        this.dicePoints = dicePoints;
+    }
+
+    //Regresa la ruta del numero de dados que genero
     public int getImagePathID(){
         int imagePathID = 0;
         switch(dicePoints){

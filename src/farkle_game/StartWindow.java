@@ -6,26 +6,27 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class InitWindow {
+public class StartWindow {
     //Declarar objetos y atributos
     private JFrame playerWindow;
     private JButton save;
 
-    private int playersAmount;
-    private int objectivePoints;
+    private int playersAmount; //Guarda la cantidad de jugadores seleccionados
+    private int objectivePoints; //Guarda los puntos seleccionados
 
-    //Invicar ventana
-    public InitWindow(){
+    //Invocar ventana
+    public StartWindow(){
         playersWindow();
     }
 
     //Ventana para pedir numero de jugadores
     private void playersWindow(){
+        //Acumuladores para lambdas
         int savePlayersAmount[] = {0};
         int saveSelectedPoints[] = {0};
 
-        //Definir ventana
-        playerWindow = new JFrame("Practica 4 - N. de jugadores");
+        //Crear ventana
+        playerWindow = new JFrame("Practica 4 - N. de jugadores y Puntaje");
         playerWindow.setSize(500, 350);
         playerWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         playerWindow.setLayout(null);
@@ -41,7 +42,7 @@ public class InitWindow {
         playerInstructions.setBounds((500 - playerInstructions.getPreferredSize().width) / 2, (240 - playerInstructions.getPreferredSize().height) / 6, playerInstructions.getPreferredSize().width, playerInstructions.getPreferredSize().height);
         playerInstructions.setVisible(true);
 
-        //Definit lista de jugadores
+        //Definit lista de numero de jugadores
         JComboBox playersList = new JComboBox<>();
         playersList.setFont(new Font ("ARIAL", Font.BOLD, 22));
         playersList.setBackground(Color.WHITE);
