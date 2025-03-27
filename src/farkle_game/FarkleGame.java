@@ -6,6 +6,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.stream.IntStream;
 
 public class FarkleGame {
     //Atributos
@@ -19,7 +20,6 @@ public class FarkleGame {
     private int preliminarPoints; //Muestra los puntos tentativos del turno actual
 
     private boolean isFarkle; //Determina si el tiro de dados es un "Farkle"
-    private boolean unnableHotDices; //Determina si existen "Hot Dices"
     private int hotDicesPoints; //Guarda los puntos obtenidos con Hot Dices
 
     //Objetos graficos
@@ -46,7 +46,6 @@ public class FarkleGame {
         this.objectivePoints = objectivePoints;
 
         //Determinar "Hot Dices" en verdadero
-        unnableHotDices = true;
         hotDicesPoints = 0;
 
         //Establecer valores por defecto
@@ -97,7 +96,7 @@ public class FarkleGame {
         JLabel playerPointsTitle = new JLabel("Limite de " + objectivePoints + " Puntos");
         playerPointsTitle.setVisible(true);
         playerPointsTitle.setFont(new Font ("ARIAL", Font.BOLD, 20));
-        playerPointsTitle.setBounds((1100 - 700) / 6, 20, playerPointsTitle.getPreferredSize().width, playerPointsTitle.getPreferredSize().height);
+        playerPointsTitle.setBounds((1100 - 700) / 6, 20, 400, playerPointsTitle.getPreferredSize().height);
         window.add(playerPointsTitle);
 
         //Crea etiquetas de puntos jugadores
@@ -231,7 +230,6 @@ public class FarkleGame {
 
             //Reseleccionar dados
             dicesSet.unlockAllDices();
-            unnableHotDices = true;
             hotDicesPoints = 0;
 
             //Actualizar etiqueta de turno de jugador
@@ -288,21 +286,19 @@ public class FarkleGame {
     }
 
     public boolean allMatch(){
+
         return dicesSet.getDices().stream().allMatch(
                 c ->  dicesSet.getDicePoints(0) == (c.getDicePoints()) //revisa si todas son iguales
         );
+
     }
 
     public int onesOfFiveMoreThanThree(int oneOrFive) { //devuelve la puntuacion de los unos y cincos en juego restando los trios de unos y cinco
-        int howMany=0;
-
         //Obtiene los dados repetidos
-        for(int i =0; i<dicesSet.getDicesSize();i++) {
-            Dice diceA = dicesSet.getDice(i);
-            if (diceA.getDicePoints() == oneOrFive) {
-                howMany++;
-            }
-        }
+        int howMany = (int) IntStream.range(0, dicesSet.getDicesSize())
+                .mapToObj(i -> dicesSet.getDice(i))
+                .filter(dice -> dice.getDicePoints() == oneOrFive)
+                .count();
 
         if(howMany > 2){ //si mas de 3 fueron iguales, devuelve la puntuacion de las siguientes a esas 3
             if(oneOrFive == 1){
@@ -331,15 +327,11 @@ public class FarkleGame {
     }
 
     public int onesOfFive(int oneOrFive){ //este metodo devuelve los puntos de todos los 1 y 5 en los dados, solo utilizarla cuando no haya un trio en juego
-        int howMany=0;
-
         //Obtiene los dados repetidos
-        for(int i =0; i<dicesSet.getDicesSize();i++) {
-            Dice diceA = dicesSet.getDice(i);
-            if (diceA.getDicePoints() == oneOrFive) {
-                howMany++;
-            }
-        }
+        int howMany = (int) IntStream.range(0, dicesSet.getDicesSize())
+                .mapToObj(i -> dicesSet.getDice(i))
+                .filter(dice -> dice.getDicePoints() == oneOrFive)
+                .count();
 
         if(oneOrFive == 1){ //dependiendo cuantos unos o 5 haya, devuelve la cantidad de puntos
 
@@ -374,7 +366,7 @@ public class FarkleGame {
         dicesThree = (ArrayList<Dice>) dicesSet.getDices().clone();
 
         dicesThree.sort((p1, p2) ->
-                Integer.compare(p1.getDicePoints(), p2.getDicePoints())
+                Integer.compare(p1.getDicePoints(), p2.getDicePoints()) //acomoda las fichas de menor a mayor
         );
         if(dicesThree.get(0).getDicePoints() == dicesThree.get(1).getDicePoints() && dicesThree.get(0).getDicePoints() == dicesThree.get(2).getDicePoints()){
             firstThree = true;
@@ -387,15 +379,11 @@ public class FarkleGame {
             Dice diceB = dicesThree.get(3);
             if(diceA.getDicePoints() == 1){
                 points += 1000;
-            }else if(diceA.getDicePoints() == 5){
-                points += 500;
             }else{
                 points += diceA.getDicePoints() *100;
             }
             if(diceB.getDicePoints() == 1){
                 points += 1000;
-            }else if(diceB.getDicePoints() == 5){
-                points += 500;
             }else{
                 points += diceB.getDicePoints() *100;
             }
@@ -406,12 +394,16 @@ public class FarkleGame {
     }
 
     //Determinar si existen Hot Dices
-    public void findHotDices(){
+    public boolean findHotDices(){
+        boolean hotDices[] = {true};
+
         dicesSet.getDices().forEach(dice -> {
             if(dice.getCanPlayDice() == true){
-                unnableHotDices = false;
+                hotDices[0] = false;
             }
         });
+
+        return hotDices[0];
     }
 
     //devuelve los puntos que tiene el jugador actualmente
@@ -420,17 +412,18 @@ public class FarkleGame {
         int threeAlikePoints = threeAlike();
         if (allMatch()) {
             points += 2 * threeAlikePoints;
+            dicesSet.lockAllDices();
         } else if (threeAndThree() != 0) {
             points += threeAndThree();
         } else {
             if (threeAlikePoints == 1000) {
-                points += 1000;
+                points += threeAlikePoints;
                 points += onesOfFiveMoreThanThree(1);
             } else {
                 points += onesOfFive(1);
             }
             if (threeAlikePoints == 500) {
-                points += 500;
+                points += threeAlikePoints;
                 points += onesOfFiveMoreThanThree(5);
             } else {
                 points += onesOfFive(5);
@@ -440,11 +433,8 @@ public class FarkleGame {
             }
         }
 
-        //Determinar si existen Hot Dices
-        findHotDices();
-
         //Acumular puntos si existen Hot Dices
-        if(unnableHotDices){
+        if(findHotDices()){
             dicesSet.unlockAllDices();
             hotDicesPoints = points + hotDicesPoints;
             preliminarPoints = hotDicesPoints;
