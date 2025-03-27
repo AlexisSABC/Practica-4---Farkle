@@ -6,6 +6,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.stream.IntStream;
 
 public class FarkleGame {
     //Atributos
@@ -30,6 +31,7 @@ public class FarkleGame {
     private JLabel playerTurn;
     private JLabel preliminaryPoints;
     private JLabel winnerMessage;
+    private JLabel statusMessage;
     private ArrayList<JLabel> playerPoints;
 
     //Dados a usar
@@ -46,6 +48,7 @@ public class FarkleGame {
 
         //Determinar "Hot Dices" en verdadero
         hotDicesPoints = 0;
+        statusMessage = new JLabel();
 
         //Establecer valores por defecto
         isFarkle = false;
@@ -179,6 +182,13 @@ public class FarkleGame {
         preliminaryPoints.setBounds( (430 / 3) + ((1100 - preliminaryPoints.getPreferredSize().width) / 2) - 20, ((500 - preliminaryPoints.getPreferredSize().height) / 2) + 65, preliminaryPoints.getPreferredSize().width + 200, preliminaryPoints.getPreferredSize().height);
         window.add(preliminaryPoints);
 
+        //Etiqueta de aviso de Hot Dices
+        statusMessage = new JLabel("!!! Hot Dices !!!");
+        statusMessage.setVisible(false);
+        statusMessage.setFont(new Font ("ARIAL", Font.BOLD, 20));
+        statusMessage.setBounds( ((1100 - statusMessage.getPreferredSize().width) / 2) + 30, ((500 - statusMessage.getPreferredSize().height) / 2) + 90, statusMessage.getPreferredSize().width + 200, statusMessage.getPreferredSize().height + 30);
+        window.add(statusMessage);
+
         //Etiqueta de mensaje de ganador
         winnerMessage = new JLabel("!!! JUGADOR n GANA EL JUEGO !!!");
         winnerMessage.setVisible(false);
@@ -230,6 +240,7 @@ public class FarkleGame {
             //Reseleccionar dados
             dicesSet.unlockAllDices();
             hotDicesPoints = 0;
+            statusMessage.setVisible(false);
 
             //Actualizar etiqueta de turno de jugador
             playerTurn.setText("Turno de Jugador " + (turnPlayerID + 1));
@@ -291,15 +302,11 @@ public class FarkleGame {
     }
 
     public int onesOfFiveMoreThanThree(int oneOrFive) { //devuelve la puntuacion de los unos y cincos en juego restando los trios de unos y cinco
-        int howMany=0;
-
-        //Obtiene los dados repetidos
-        for(int i =0; i<dicesSet.getDicesSize();i++) {
-            Dice diceA = dicesSet.getDice(i);
-            if (diceA.getDicePoints() == oneOrFive) {
-                howMany++;
-            }
-        }
+        //Lambda que obtiene los dados repetidos mediante un flujo
+        int howMany = (int) IntStream.range(0, dicesSet.getDicesSize())
+                .mapToObj(i -> dicesSet.getDice(i))
+                .filter(dice -> dice.getDicePoints() == oneOrFive)
+                .count();
 
         if(howMany > 2){ //si mas de 3 fueron iguales, devuelve la puntuacion de las siguientes a esas 3
             if(oneOrFive == 1){
@@ -328,15 +335,11 @@ public class FarkleGame {
     }
 
     public int onesOfFive(int oneOrFive){ //este metodo devuelve los puntos de todos los 1 y 5 en los dados, solo utilizarla cuando no haya un trio en juego
-        int howMany=0;
-
-        //Obtiene los dados repetidos
-        for(int i =0; i<dicesSet.getDicesSize();i++) {
-            Dice diceA = dicesSet.getDice(i);
-            if (diceA.getDicePoints() == oneOrFive) {
-                howMany++;
-            }
-        }
+        //Lambda que obtiene los dados repetidos mediante un flujo
+        int howMany = (int) IntStream.range(0, dicesSet.getDicesSize())
+                .mapToObj(i -> dicesSet.getDice(i))
+                .filter(dice -> dice.getDicePoints() == oneOrFive)
+                .count();
 
         if(oneOrFive == 1){ //dependiendo cuantos unos o 5 haya, devuelve la cantidad de puntos
 
@@ -371,7 +374,7 @@ public class FarkleGame {
         dicesThree = (ArrayList<Dice>) dicesSet.getDices().clone();
 
         dicesThree.sort((p1, p2) ->
-                Integer.compare(p1.getDicePoints(), p2.getDicePoints())
+                Integer.compare(p1.getDicePoints(), p2.getDicePoints()) //acomoda las fichas de menor a mayor
         );
         if(dicesThree.get(0).getDicePoints() == dicesThree.get(1).getDicePoints() && dicesThree.get(0).getDicePoints() == dicesThree.get(2).getDicePoints()){
             firstThree = true;
@@ -384,20 +387,16 @@ public class FarkleGame {
             Dice diceB = dicesThree.get(3);
             if(diceA.getDicePoints() == 1){
                 points += 1000;
-            }else if(diceA.getDicePoints() == 5){
-                points += 500;
             }else{
                 points += diceA.getDicePoints() *100;
             }
             if(diceB.getDicePoints() == 1){
                 points += 1000;
-            }else if(diceB.getDicePoints() == 5){
-                points += 500;
             }else{
                 points += diceB.getDicePoints() *100;
             }
 
-            dicesSet.lockAllDices();
+            dicesSet.unlockAllDices();
         }
         return points; //devuelve la suma de los puntos del jugador si es el caso, sino devuelve 0
     }
@@ -421,17 +420,19 @@ public class FarkleGame {
         int threeAlikePoints = threeAlike();
         if (allMatch()) {
             points += 2 * threeAlikePoints;
+            dicesSet.lockAllDices();
         } else if (threeAndThree() != 0) {
             points += threeAndThree();
+            dicesSet.lockAllDices();
         } else {
             if (threeAlikePoints == 1000) {
-                points += 1000;
+                points += threeAlikePoints;
                 points += onesOfFiveMoreThanThree(1);
             } else {
                 points += onesOfFive(1);
             }
             if (threeAlikePoints == 500) {
-                points += 500;
+                points += threeAlikePoints;
                 points += onesOfFiveMoreThanThree(5);
             } else {
                 points += onesOfFive(5);
@@ -447,8 +448,13 @@ public class FarkleGame {
             hotDicesPoints = points + hotDicesPoints;
             preliminarPoints = hotDicesPoints;
 
+            statusMessage.setVisible(true);
+            statusMessage.setText("!!! HOT DICES !!!");
+            statusMessage.setLocation(((1100 - statusMessage.getPreferredSize().width) / 2) + 140, ((500 - statusMessage.getPreferredSize().height) / 2) + 90);
+
         }else{
             preliminarPoints = hotDicesPoints + points;
+            statusMessage.setVisible(false);
         }
 
         preliminaryPoints.setText("Puntos preliminares: " + preliminarPoints + ".");
@@ -472,12 +478,15 @@ public class FarkleGame {
         if((preliminarPoints == puntosJugadorRonda) && isAllLocked[0]){ //verifica si cambio los puntos de la ronda, osea obtuvo mejor puntuacion, en caso contario es farkle y pierde todos los puntos de la ronda
             isFarkle = true; //avisa que no cambio nada de puntos, por lo cual es farkle
             dicesSet.lockAllDices();
-            preliminaryPoints.setText("FARKLE - Puntos perdidos");
+            preliminaryPoints.setText("Puntos preliminares: 0.");
             preliminarPoints = 0;
+
+            statusMessage.setVisible(true);
+            statusMessage.setText("!!! FARKLE - Perdiste tus puntos !!!");
+            statusMessage.setLocation(((1100 - statusMessage.getPreferredSize().width) / 2) + 130, ((500 - statusMessage.getPreferredSize().height) / 2) + 90);
 
         }else{
             puntosJugadorRonda=preliminarPoints; //va guardando los puntos de la ronda
         }
     }
-
 }
